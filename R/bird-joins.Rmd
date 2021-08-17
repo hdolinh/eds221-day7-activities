@@ -97,7 +97,30 @@ Then, create a subset that contains all observations in the birds dataset, joins
 ```{r}
 bird_observations <- bird_observations %>% 
   full_join(y = taxalist, by = "species_id") %>% 
-  full_join(y = sites, by = "site_id") %>% 
-  full_join(y = surveys, by = "site_id")
+    full_join(y = sites, by = "site_id") %>% 
+    full_join(y = surveys, by = c("survey_id", "site_id")) %>%
+  select(c(survey_date, common_name, park_name, bird_count))
+
+# learned that I can't get around the column names being the name because rename(site_id_2 = site_id) %>% 
 ```
+
+Use lubridate::month() to add a new column called survey_month, containing only the month number. Then, convert the month number to a factor (again within mutate())
+
+Learn a new function on your own! Use dplyr::relocate() to move the new survey_month column to immediately after the survey_date column. You can do this in a separate code chunk, or pipe straight into it from your existing code.
+
+Find the total number of birds observed by park and month (i.e., you’ll group_by(park_name, survey_month))
+
+Filter to only include parks “Lindo”, “Orme”, “Palomino” and “Sonrisa”
+
+```{r}
+bird_observations <- bird_observations %>% 
+  mutate(survey_month = lubridate::month(survey_date)) %>% 
+  mutate(survey_month = as.factor(survey_month)) %>% 
+  dplyr::relocate(survey_month, .after = survey_date) %>% 
+  group_by(park_name, survey_month) %>% 
+  filter(park_name %in% c("Lindo", "Orme", "Palomino", "Sonrisa"))
+```
+
+
+
 
